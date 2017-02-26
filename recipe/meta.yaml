@@ -1,0 +1,111 @@
+#
+# Find our git repo: https://github.com/loopbio/nervana-neon-feedstock
+#
+# Old conda-forge PR for the CPU version:
+#   https://github.com/conda-forge/staged-recipes/pull/1416
+#
+# Some recipies for pycuda and scikit-cuda
+#   https://github.com/neurokernel
+#   https://github.com/conda-forge/staged-recipes/pull/1775
+#
+
+# N.B. revisit makefile and (vis-/gpu-)requirements.txt when updating the recipe
+# In particular, we are "unpinning" (making >= instead of ==) their dependencies.
+{% set version = "1.8.2" %}
+
+{% set variant = "openblas" %}
+
+package:
+  name: nervana-neon
+  version: {{ version }}
+
+source:
+  fn: nervana-neon-v{{ version }}.tar.gz
+  url: https://github.com/NervanaSystems/neon/archive/v{{ version }}.tar.gz
+  sha256: a6f8d64139f4917002ac5d7a4378136f4a4c5040b82e81bec4e83465c0b4bb4a
+
+build:
+  number: 0
+  skip: true  # [not linux]
+  script: HAS_GPU=1 VIS=1 pip install --no-deps .
+  # HAS_GPU=1 VIS=1 make sysinstall
+  features:
+    - blas_{{ variant }}
+    - cuda80
+
+requirements:
+  # From (vis-)(gpu-)requirements.txt (would need to unpin dependencies)
+  # N.B. revisit makefiles and (vis-/gpu-)requirements.txt when updating the recipe
+
+  build:
+    - python
+    - numpy x.x
+    - blas 1.1 {{ variant }}
+    - openblas 0.2.19|0.2.19.*
+    - cuda80-feature
+    - nervana-aeon
+
+    # Does have packages
+    - pkg-config
+    - hdf5 1.8.17|1.8.17.*
+    - pyyaml >=3.12
+
+    # We are not generating any doc...
+    # - sphinx >=1.4.6
+
+    - configargparse >=0.10.0
+    - appdirs >=1.4.0
+    - posix_ipc >=1.0.0  # N.B., underscore given in defaults
+    - pillow >=3.3.1
+    - h5py >=2.6.0
+    - future >=0.15.2
+    - tqdm >=4.8.4
+    - bokeh >=0.9.3
+    - jinja2 >=2.8
+    - pytools
+
+    # Need new package
+#    - pycuda>=2015.1
+#    - scikit-cuda>=0.5.1
+
+  run:
+    - python
+    - numpy x.x
+    - blas 1.1 {{ variant }}
+    - openblas 0.2.19|0.2.19.*
+    - cuda80-feature
+    - nervana-aeon
+
+    - configargparse >=0.10.0
+    - appdirs >=1.4.0
+    - posix_ipc >=1.0.0  # N.B., underscore given in defaults
+    - pillow >=3.3.1
+    - h5py >=2.6.0
+    - future >=0.15.2
+    - tqdm >=4.8.4
+    - bokeh >=0.9.3
+    - jinja2 >=2.8
+    - pytools
+
+test:
+  requires:
+    - pep8 >=1.7.0
+    - flake8 >=3.0.4
+    - pytest >=3.0.1
+    - pytest-cov >=2.3.1
+    - pylint >=1.6.4
+  imports:
+    - neon
+  commands:
+    - neon -h
+    - nvis -h
+    - py.test -m "hasgpu or not hasgpu" tests
+
+about:
+  home: https://github.com/NervanaSystems/neon
+  license: Apache
+  summary: Intel Nervana reference deep learning framework committed to best performance on all hardware http://neon.nervanasys.com/docs/latest
+
+extra:
+  recipe-maintainers:
+    - sdvillal
