@@ -23,39 +23,51 @@ source:
   fn: nervana-neon-v{{ version }}.tar.gz
   url: https://github.com/NervanaSystems/neon/archive/v{{ version }}.tar.gz
   sha256: a6f8d64139f4917002ac5d7a4378136f4a4c5040b82e81bec4e83465c0b4bb4a
+  patches:
+    # More generic perl shebang; fix using deprecated numpy API (breaks already in 1.12)
+    - fix-perl-shebang-deprecated-np.patch
 
 build:
   number: 0
   skip: true  # [not linux]
-  script: HAS_GPU=1 VIS=1 pip install --no-deps .
-  # HAS_GPU=1 VIS=1 make sysinstall
+  script:
+    # Need to fix all these CUDA paths in the docker image
+    - LIBRARY_PATH=/usr/local/nvidia/lib:$LIBRARY_PATH HAS_GPU=1 VIS=1 make sysinstall_nodeps
+
   features:
     - blas_{{ variant }}
     - cuda80
+    - perl
 
 requirements:
   # From (vis-)(gpu-)requirements.txt (would need to unpin dependencies)
   # N.B. revisit makefiles and (vis-/gpu-)requirements.txt when updating the recipe
 
   build:
+    # Ensure we grab specialised deps
+    - cuda80-feature
+    - gtk2-feature
+    - ffmpeg-feature
+    - perl-feature
+
+    - pkg-config
+    - cython  # N.B. look at Makefile
+
     - python
     - numpy x.x
     - blas 1.1 {{ variant }}
     - openblas 0.2.19|0.2.19.*
-    - cuda80-feature
-    - nervana-aeon
-
-    # Does have packages
-    - pkg-config
     - hdf5 1.8.17|1.8.17.*
     - pyyaml >=3.12
+
+    - nervana-aeon
 
     # We are not generating any doc...
     # - sphinx >=1.4.6
 
     - configargparse >=0.10.0
     - appdirs >=1.4.0
-    - posix_ipc >=1.0.0  # N.B., underscore given in defaults
+    - posix_ipc >=1.0.0
     - pillow >=3.3.1
     - h5py >=2.6.0
     - future >=0.15.2
@@ -64,21 +76,21 @@ requirements:
     - jinja2 >=2.8
     - pytools
 
-    # Need new package
-#    - pycuda>=2015.1
-#    - scikit-cuda>=0.5.1
+    # Packages (brittly built) in the loopbio channel
+    - pycuda >=2015.1
+    - scikit-cuda >=0.5.1
 
   run:
     - python
     - numpy x.x
     - blas 1.1 {{ variant }}
     - openblas 0.2.19|0.2.19.*
-    - cuda80-feature
+
     - nervana-aeon
 
     - configargparse >=0.10.0
     - appdirs >=1.4.0
-    - posix_ipc >=1.0.0  # N.B., underscore given in defaults
+    - posix_ipc >=1.0.0
     - pillow >=3.3.1
     - h5py >=2.6.0
     - future >=0.15.2
@@ -87,8 +99,25 @@ requirements:
     - jinja2 >=2.8
     - pytools
 
+    # Yes, perl, for maxas...
+    #   https://github.com/NervanaSystems/neon/blob/485033cd5e703e70befd82ca8234c97cdf61ab39/neon/backends/kernels/maxas/maxas.pl
+    # We could just assume it is installed system-wide though
+    - perl
+
+    # Packages (brittly built) in the loopbio channel
+    - pycuda >=2015.1
+    - scikit-cuda >=0.5.1
+
 test:
+  source_files:
+    - tests
   requires:
+    # Ensure we grab specialised deps
+    - cuda80-feature
+    - gtk2-feature
+    - ffmpeg-feature
+    - perl-feature
+    # Test & lint
     - pep8 >=1.7.0
     - flake8 >=3.0.4
     - pytest >=3.0.1
