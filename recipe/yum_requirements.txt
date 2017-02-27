@@ -4,3 +4,7 @@
 # So don't. This instead makes the linker happy.
 libXcursor-devel
 libXinerama-devel
+
+# We need to patch this hardcoded perl path if we want to use conda perl
+# https://github.com/NervanaSystems/neon/blob/485033cd5e703e70befd82ca8234c97cdf61ab39/neon/backends/kernels/maxas/maxas.pl
+# perl
