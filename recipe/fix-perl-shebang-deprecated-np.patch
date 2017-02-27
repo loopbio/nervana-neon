@@ -1,0 +1,44 @@
+diff --git a/neon/backends/kernels/maxas/maxas.pl b/neon/backends/kernels/maxas/maxas.pl
+index 5982a09..d84147d 100755
+--- a/neon/backends/kernels/maxas/maxas.pl
++++ b/neon/backends/kernels/maxas/maxas.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ use strict;
+ use MaxAs::Cubin;
+ use MaxAs::MaxAs;
+diff --git a/neon/layers/layer.py b/neon/layers/layer.py
+index ceb316f..df37233 100644
+--- a/neon/layers/layer.py
++++ b/neon/layers/layer.py
+@@ -1288,7 +1288,7 @@ class Reshape(Layer):
+         self.out_shape = list(self.reshape)
+ 
+         if 0 in self.reshape:
+-            dim_to_keep = np.where(np.array(self.reshape) == 0)[0]
++            dim_to_keep = np.where(np.array(self.reshape) == 0)[0][0]
+             self.out_shape[dim_to_keep] = list(self.in_shape)[dim_to_keep]
+ 
+         if -1 in self.reshape:
+diff --git a/tests/test_backend_autodiff_extra.py b/tests/test_backend_autodiff_extra.py
+index 69cb156..cda5b98 100644
+--- a/tests/test_backend_autodiff_extra.py
++++ b/tests/test_backend_autodiff_extra.py
+@@ -77,12 +77,12 @@ class TestAutodiff(object):
+         m = self.m
+         n = self.n
+         if 'scalar' in flags:
+-            m = 1.
+-            n = 1.
++            m = 1
++            n = 1
+         if 'row' in flags:
+-            m = 1.
++            m = 1
+         if 'col' in flags:
+-            n = 1.
++            n = 1
+         # integer
+         if 'int' in flags:
+             if 'pos' in flags:
