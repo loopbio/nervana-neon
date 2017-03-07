@@ -1,0 +1,17 @@
+{% extends 'base.yaml' %}
+
+{% block recipe %}
+
+package:
+  name: neon-cuda-feature
+  version: {{ neon_cuda_version }}
+
+build:
+  number: 0
+  track_features:
+    - neon_cuda{{ cuda_version }}
+  features:
+    - cuda{{ cuda_version }}
+    - cuda{{ cuda_version }}dev
+
+{% endblock %}
