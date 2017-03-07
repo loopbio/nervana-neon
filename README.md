@@ -14,7 +14,7 @@ Summary: Intel Nervana reference deep learning framework committed to best perfo
 Current build status
 ====================
 
-Linux: [![Circle CI](https://circleci.com/gh/loopbio/nervana-neon-gpu-feedstock.svg?style=shield)](https://circleci.com/gh/loopbio/nervana-neon-gpu-feedstock)
+Linux: [![Circle CI](https://circleci.com/gh/loopbio/nervana-neon-cpu-feedstock.svg?style=shield)](https://circleci.com/gh/loopbio/nervana-neon-cpu-feedstock)
 OSX: ![](https://cdn.rawgit.com/conda-forge/conda-smithy/90845bba35bec53edac7a16638aa4d77217a3713/conda_smithy/static/disabled.svg)
 Windows: ![](https://cdn.rawgit.com/conda-forge/conda-smithy/90845bba35bec53edac7a16638aa4d77217a3713/conda_smithy/static/disabled.svg)
 
