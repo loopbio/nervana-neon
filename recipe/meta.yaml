@@ -100,7 +100,7 @@ test:
   commands:
     - neon -h
     - nvis -h
-    - py.test -m "not hasgpu" tests
+    - py.test -k cpu -m "not hasgpu" tests
 
 about:
   home: https://github.com/NervanaSystems/neon
