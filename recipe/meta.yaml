@@ -1,27 +1,21 @@
 #
-# Find our git repo: https://github.com/loopbio/nervana-neon-feedstock
-#
 # Old conda-forge PR for the CPU version:
 #   https://github.com/conda-forge/staged-recipes/pull/1416
-#
-# Some recipies for pycuda and scikit-cuda
-#   https://github.com/neurokernel
-#   https://github.com/conda-forge/staged-recipes/pull/1775
 #
 
 # N.B. revisit makefile and (vis-/gpu-)requirements.txt when updating the recipe
 # In particular, we are "unpinning" (making >= instead of ==) their dependencies.
-{% set version = "1.8.2" %}
+{% extends "base.yaml" %}
 
-{% set variant = "openblas" %}
+{% block recipe %}
 
 package:
-  name: nervana-neon
-  version: {{ version }}
+  name: neon
+  version: {{ neon_version }}
 
 source:
-  fn: nervana-neon-v{{ version }}.tar.gz
-  url: https://github.com/NervanaSystems/neon/archive/v{{ version }}.tar.gz
+  fn: neon-v{{ neon_version }}.tar.gz
+  url: https://github.com/NervanaSystems/neon/archive/v{{ neon_version }}.tar.gz
   sha256: a6f8d64139f4917002ac5d7a4378136f4a4c5040b82e81bec4e83465c0b4bb4a
   patches:
     # More generic perl shebang; fix using deprecated numpy API (breaks already in 1.12)
@@ -31,12 +25,13 @@ build:
   number: 0
   skip: true  # [not linux]
   script:
-    # Need to fix all these CUDA paths in the docker image
-    - LIBRARY_PATH=/usr/local/nvidia/lib:$LIBRARY_PATH HAS_GPU=1 VIS=1 make sysinstall_nodeps
+    - HAS_GPU=1 VIS=1 make sysinstall_nodeps
 
   features:
-    - blas_{{ variant }}
-    - cuda80
+    - blas_{{ blas_variant }}
+    - cuda{{ cuda_version }}
+    - cuda{{ cuda_version }}dev  # no features dependencies in conda
+    - neon_cuda{{ cuda_version }}
     - perl
 
 requirements:
@@ -44,23 +39,18 @@ requirements:
   # N.B. revisit makefiles and (vis-/gpu-)requirements.txt when updating the recipe
 
   build:
-    # Ensure we grab specialised deps
-    - cuda80-feature
-    - gtk2-feature
-    - ffmpeg-feature
-    - perl-feature
-
     - pkg-config
     - cython  # N.B. look at Makefile
 
     - python
     - numpy x.x
-    - blas 1.1 {{ variant }}
+    - blas 1.1 {{ blas_variant }}
     - openblas 0.2.19|0.2.19.*
     - hdf5 1.8.17|1.8.17.*
     - pyyaml >=3.12
 
-    - nervana-aeon
+    # Really needed?
+    - aeon
 
     # We are not generating any doc...
     # - sphinx >=1.4.6
@@ -76,17 +66,18 @@ requirements:
     - jinja2 >=2.8
     - pytools
 
-    # Packages (brittly built) in the loopbio channel
+    - cuda-dev-feature {{ cuda_version }}
+    - cuda-feature {{ cuda_version }}
     - pycuda >=2015.1
     - scikit-cuda >=0.5.1
 
   run:
     - python
     - numpy x.x
-    - blas 1.1 {{ variant }}
+    - blas 1.1 {{ blas_variant }}
     - openblas 0.2.19|0.2.19.*
 
-    - nervana-aeon
+    - aeon
 
     - configargparse >=0.10.0
     - appdirs >=1.4.0
@@ -99,12 +90,6 @@ requirements:
     - jinja2 >=2.8
     - pytools
 
-    # Yes, perl, for maxas...
-    #   https://github.com/NervanaSystems/neon/blob/485033cd5e703e70befd82ca8234c97cdf61ab39/neon/backends/kernels/maxas/maxas.pl
-    # We could just assume it is installed system-wide though
-    - perl
-
-    # Packages (brittly built) in the loopbio channel
     - pycuda >=2015.1
     - scikit-cuda >=0.5.1
 
@@ -113,10 +98,13 @@ test:
     - tests
   requires:
     # Ensure we grab specialised deps
-    - cuda80-feature
-    - gtk2-feature
-    - ffmpeg-feature
+    - cuda-dev-feature {{ cuda_version }}
+    - cuda-feature {{ cuda_version }}
+    - neon-cuda-feature {{ neon_cuda_version }}
+    # Yes, perl, for maxas...
+    #   https://github.com/NervanaSystems/neon/blob/485033cd5e703e70befd82ca8234c97cdf61ab39/neon/backends/kernels/maxas/maxas.pl
     - perl-feature
+    - perl
     # Test & lint
     - pep8 >=1.7.0
     - flake8 >=3.0.4
@@ -132,9 +120,8 @@ test:
 
 about:
   home: https://github.com/NervanaSystems/neon
-  license: Apache
+  license: Apache 2
+  license_file: LICENSE
   summary: Intel Nervana reference deep learning framework committed to best performance on all hardware http://neon.nervanasys.com/docs/latest
 
-extra:
-  recipe-maintainers:
-    - sdvillal
+{% endblock %}
