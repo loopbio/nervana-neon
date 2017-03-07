@@ -25,14 +25,10 @@ build:
   number: 0
   skip: true  # [not linux]
   script:
-    - HAS_GPU=1 VIS=1 make sysinstall_nodeps
+    - HAS_GPU=0 VIS=1 make sysinstall_nodeps
 
   features:
     - blas_{{ blas_variant }}
-    - cuda{{ cuda_version }}
-    - cuda{{ cuda_version }}dev  # no features dependencies in conda
-    - neon_cuda{{ cuda_version }}
-    - perl
 
 requirements:
   # From (vis-)(gpu-)requirements.txt (would need to unpin dependencies)
@@ -66,11 +62,6 @@ requirements:
     - jinja2 >=2.8
     - pytools
 
-    - cuda-dev-feature {{ cuda_version }}
-    - cuda-feature {{ cuda_version }}
-    - pycuda >=2015.1
-    - scikit-cuda >=0.5.1
-
   run:
     - python
     - numpy x.x
@@ -90,17 +81,10 @@ requirements:
     - jinja2 >=2.8
     - pytools
 
-    - pycuda >=2015.1
-    - scikit-cuda >=0.5.1
-
 test:
   source_files:
     - tests
   requires:
-    # Ensure we grab specialised deps
-    - cuda-dev-feature {{ cuda_version }}
-    - cuda-feature {{ cuda_version }}
-    - neon-cuda-feature {{ neon_cuda_version }}
     # Yes, perl, for maxas...
     #   https://github.com/NervanaSystems/neon/blob/485033cd5e703e70befd82ca8234c97cdf61ab39/neon/backends/kernels/maxas/maxas.pl
     - perl-feature
@@ -116,7 +100,7 @@ test:
   commands:
     - neon -h
     - nvis -h
-    - py.test -m "hasgpu or not hasgpu" tests
+    - py.test -m "not hasgpu" tests
 
 about:
   home: https://github.com/NervanaSystems/neon
