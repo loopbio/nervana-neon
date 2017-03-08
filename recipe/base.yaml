@@ -7,6 +7,6 @@
 {% block recipe %}{% endblock %}
 
 extra:
-  recipe-url: https://github.com/loopbio/nervana-aeon-feedstock
+  recipe-url: https://github.com/loopbio/nervana-neon-feedstock
   recipe-maintainers:
     - sdvillal
